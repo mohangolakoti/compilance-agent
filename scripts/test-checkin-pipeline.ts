@@ -68,7 +68,7 @@ async function runCheckInPipelineTest() {
     console.log(`   Overall Status:             [${result.evaluation.overallStatus}]`);
     console.log(`   Requires Coordinator Alert: ${result.evaluation.requiresCoordinatorAction ? '⚠️ YES' : '✅ NO'}`);
     console.log(`   Violations (${result.evaluation.violations.length}):`);
-    result.evaluation.violations.forEach((v, idx) => {
+    result.evaluation.violations.forEach((v) => {
       console.log(`     - [${v.severity}] ${v.ruleName}: ${v.description}`);
       console.log(`       Action: ${v.recommendation}`);
     });

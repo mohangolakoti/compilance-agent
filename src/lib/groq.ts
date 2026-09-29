@@ -11,7 +11,6 @@ import Groq from 'groq-sdk';
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 declare global {
-  // eslint-disable-next-line no-var
   var __groqClient: Groq | undefined;
 }
 

@@ -7,7 +7,6 @@
  */
 
 import mongoose from 'mongoose';
-import { getEnv } from './env';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -19,7 +18,6 @@ interface MongooseCache {
 // In development, use a global variable so the value is preserved
 // across module reloads caused by Hot Module Replacement.
 declare global {
-  // eslint-disable-next-line no-var
   var __mongooseCache: MongooseCache | undefined;
 }
 

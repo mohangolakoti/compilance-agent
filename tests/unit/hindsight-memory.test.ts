@@ -77,4 +77,35 @@ describe('Phase 2 — Hindsight Memory Service Unit Tests', () => {
     const found = models.find((m) => m.name === 'Skin Reaction Pattern');
     expect(found).toBeDefined();
   });
+
+  test('cross-patient isolation prevents Patient B from recalling Patient A memories', async () => {
+    const patientA = 'PATIENT-ISO-A';
+    const patientB = 'PATIENT-ISO-B';
+
+    // Retain unique memory for Patient A
+    await retainPatientObservation(
+      trialId,
+      patientA,
+      'Patient A experienced severe dizziness and unusual vertigo on Tuesday morning.',
+      { tags: ['dizziness'] }
+    );
+
+    // Retain different memory for Patient B
+    await retainPatientObservation(
+      trialId,
+      patientB,
+      'Patient B reported no adverse symptoms and took medication on time.',
+      { tags: ['compliant'] }
+    );
+
+    // Query Patient B for Patient A's unique symptom
+    const recallB = await recallPatientMemory(trialId, patientB, 'vertigo');
+    expect(recallB.ok).toBe(true);
+
+    // Patient B's results must NOT contain Patient A's vertigo observation
+    const containsPatientAMemory = recallB.results.some((r) =>
+      r.text.includes('Patient A experienced severe dizziness')
+    );
+    expect(containsPatientAMemory).toBe(false);
+  });
 });

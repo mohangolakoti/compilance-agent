@@ -10,7 +10,6 @@ import {
   ProtocolModel,
   PatientModel,
   CheckInModel,
-  ComplianceLogModel,
   AuditEventModel,
 } from '../src/models';
 import { buildBankId } from '../src/lib/hindsight';
