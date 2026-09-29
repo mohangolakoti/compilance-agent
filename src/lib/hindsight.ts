@@ -12,7 +12,6 @@ const HINDSIGHT_API_URL = process.env.HINDSIGHT_API_URL;
 const HINDSIGHT_API_KEY = process.env.HINDSIGHT_API_KEY;
 
 declare global {
-  // eslint-disable-next-line no-var
   var __hindsightClient: HindsightClient | undefined;
 }
 

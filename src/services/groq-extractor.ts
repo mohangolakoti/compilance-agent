@@ -19,7 +19,7 @@ export interface ExtractionResult {
   rawResponse?: string;
 }
 
-function calculateDelayMinutes(timeStr?: string, targetTime: string = '08:00'): number {
+function calculateDelayMinutes(timeStr?: string): number {
   if (!timeStr) return 0;
   // Match HH:MM or H:MM AM/PM
   const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
