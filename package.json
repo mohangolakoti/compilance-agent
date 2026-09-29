@@ -1,0 +1,41 @@
+{
+  "name": "compilance-agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "jest",
+    "deploy:vercel": "vercel --prod",
+    "smoke:prod": "node scripts/smoke-prod-check.mjs"
+  },
+  "dependencies": {
+    "@vectorize-io/hindsight-client": "^0.10.2",
+    "framer-motion": "^13.4.6",
+    "groq-sdk": "^1.6.0",
+    "mongoose": "^9.10.3",
+    "next": "16.3.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.7",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "tailwindcss": "^4",
+    "ts-jest": "^29.4.14",
+    "typescript": "^5"
+  }
+}
