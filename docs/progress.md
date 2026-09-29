@@ -548,7 +548,7 @@ The project now includes a realistic synthetic benchmark dataset suitable for re
 ### Tests executed
 
 - `npm test -- --runTestsByPath tests/unit/hardening.test.ts`: **Passed (3/3)**
-- `npm test -- --runInBand`: **Passed (57/57 tests)**
+- `npm test -- --runInBand`: **Passed at the time (57/57 tests)**; superseded by the 2026-09-30 audit report.
 - `npm run build`: **Passed**
 
 ### Validation result
@@ -560,7 +560,7 @@ The app now includes explicit reliability guardrails: limited retries for transi
 ## PHASE 14 — Production Deployment
 
 **Date:** 2026-09-29  
-**Status:** COMPLETE
+**Status:** COMPLETE WITH AUDIT FOLLOW-UP REQUIRED
 
 ### What was implemented
 
@@ -601,4 +601,29 @@ The app is now deployment-ready for Vercel, with explicit cloud environment requ
 
 ### Validation result
 
-The project is now packaged for final demo delivery: a stable hero patient, a clear public narrative, a reproducible demo flow, and a submission-ready artifact set.
+The project has a stable hero patient and submission narrative, but the final audit found unverified live integrations and incomplete production workflows. It is not yet ready to claim a complete public demo.
+
+---
+
+## PHASE 16 — Full Application Audit
+
+**Date:** 2026-09-30  
+**Status:** COMPLETE WITH OPEN DEFECTS
+
+### What was implemented
+
+- Added [`docs/final-audit.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/final-audit.md), [`docs/prd-traceability.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/prd-traceability.md), and [`docs/test-report.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/test-report.md).
+- Added [`docs/memory-comparison.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/memory-comparison.md) and [`docs/known-limitations.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/known-limitations.md).
+- Isolated unit tests from external services with explicit mock modes.
+- Added production coordinator API authentication via `COORDINATOR_API_TOKEN`.
+- Added MongoDB/Hindsight outage handling and removed unsafe medication-change recommendations.
+
+### Verification
+
+- `npm test -- --runInBand`: **Passed (66/66 tests)**
+- `npm run lint`: **Passed with 7 warnings**
+- `npm run build`: **Passed**
+
+### Remaining status
+
+Live integrations, public deployment, complete authorization scope, API-backed dashboard behavior, dedicated operational entities, and production-grade PDF ingestion remain open according to the audit.

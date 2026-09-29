@@ -85,7 +85,7 @@ export function evaluateProtocolRules(
           severity: medRule?.severity ?? 'CRITICAL',
           description: `Patient reported taking prohibited concomitant medication: ${med.name}${med.dose ? ` (${med.dose})` : ''}.`,
           evidence: `Extracted concomitant medication: ${med.name}, reason: ${med.reason ?? 'not specified'}.`,
-          recommendation: `CRITICAL: Instruct patient to DISCONTINUE ${med.name} immediately due to potential drug interaction or masking of trial endpoints.`,
+          recommendation: `CRITICAL: Escalate the reported ${med.name} use to the clinical coordinator for protocol and safety review. Do not provide medication-change instructions through this system.`,
         });
       }
     }

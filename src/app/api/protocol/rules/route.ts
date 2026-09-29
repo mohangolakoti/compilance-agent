@@ -5,10 +5,14 @@ import {
   extractProtocolTextFromPdf,
   reviewProtocolRule,
 } from '@/services/protocol-ingestion';
+import { requireCoordinatorAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  const unauthorized = requireCoordinatorAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const trialId = searchParams.get('trialId') ?? 'CT-2026-X';
@@ -41,6 +45,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = requireCoordinatorAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const action = body.action ?? 'extract';

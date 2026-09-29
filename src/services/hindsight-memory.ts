@@ -64,7 +64,7 @@ const mockMemoryStore: Map<
 > = new Map();
 
 function isLiveMode(): boolean {
-  return Boolean(process.env.HINDSIGHT_API_KEY && process.env.HINDSIGHT_API_URL);
+  return process.env.HINDSIGHT_MODE !== 'mock' && Boolean(process.env.HINDSIGHT_API_KEY && process.env.HINDSIGHT_API_URL);
 }
 
 /**

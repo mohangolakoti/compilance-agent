@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { processPatientCheckIn } from '@/services/checkin-pipeline';
+import { requireCoordinatorAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const unauthorized = requireCoordinatorAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { patientId, trialId, rawResponse, dayNumber, channel } = body;

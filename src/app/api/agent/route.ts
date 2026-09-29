@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { AgentQuestionSchema, runToolLoop } from '@/services/coordinator-agent';
+import { requireCoordinatorAuth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const unauthorized = requireCoordinatorAuth(request);
+  if (unauthorized) return unauthorized;
+
   return NextResponse.json({
     ok: true,
     name: 'Coordinator AI Assistant',
@@ -23,6 +27,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = requireCoordinatorAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const parsed = AgentQuestionSchema.safeParse(body);

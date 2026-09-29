@@ -11,8 +11,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getPendingCoordinatorReviews } from '@/services/feedback-service';
+import { requireCoordinatorAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
+  const unauthorized = requireCoordinatorAuth(req);
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(req.url);
     const trialId = searchParams.get('trialId') ?? undefined;

@@ -21,11 +21,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { submitCoordinatorReview, CoordinatorActionSchema } from '@/services/feedback-service';
+import { requireCoordinatorAuth } from '@/lib/auth';
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ logId: string }> }
 ) {
+  const unauthorized = requireCoordinatorAuth(req);
+  if (unauthorized) return unauthorized;
+
   const { logId } = await params;
 
   let body: unknown;

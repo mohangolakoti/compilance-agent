@@ -12,11 +12,15 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getComplianceLogForReview } from '@/services/feedback-service';
+import { requireCoordinatorAuth } from '@/lib/auth';
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ logId: string }> }
 ) {
+  const unauthorized = requireCoordinatorAuth(_req);
+  if (unauthorized) return unauthorized;
+
   const { logId } = await params;
 
   try {

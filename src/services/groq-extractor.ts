@@ -135,7 +135,7 @@ export async function extractCheckInData(
   rawText: string,
   options?: { targetTimeOfDay?: string }
 ): Promise<ExtractionResult> {
-  const isGroqConfigured = Boolean(process.env.GROQ_API_KEY);
+  const isGroqConfigured = process.env.GROQ_MODE !== 'mock' && Boolean(process.env.GROQ_API_KEY);
 
   if (!isGroqConfigured) {
     return {

@@ -1,14 +1,21 @@
 # Architecture — Clinical Trial Hindsight Compliance Agent
 
-**Version:** 0.0 (PHASE 0 — Initial assessment)  
-**Date:** 2026-09-29  
-**Status:** Draft
+**Version:** 1.0 (audit-reconciled architecture)  
+**Date:** 2026-09-30  
+**Status:** Implemented with documented gaps
 
 ---
 
 ## 1. System Overview
 
 The product is a **memory-powered clinical trial operations copilot**.
+
+Production API routes that handle check-ins, coordinator decisions, agent queries,
+and protocol changes require `COORDINATOR_API_TOKEN`. Local development may run
+without that token, while Vercel/production fails closed if it is missing.
+
+Unit tests explicitly set `HINDSIGHT_MODE=mock`, `GROQ_MODE=mock`, and
+`MONGODB_MODE=mock`; these modes must not be used as evidence of live integration.
 
 Core loop:
 

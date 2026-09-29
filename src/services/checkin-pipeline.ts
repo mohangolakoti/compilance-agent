@@ -14,6 +14,7 @@
  */
 
 import { connectToDatabase } from '@/lib/mongodb';
+import { buildBankId } from '@/lib/hindsight';
 import {
   CheckInModel,
   ComplianceLogModel,
@@ -57,10 +58,12 @@ export interface ProcessCheckInOutput {
 export async function processPatientCheckIn(
   input: ProcessCheckInInput
 ): Promise<ProcessCheckInOutput> {
-  // Connect to DB if available
+  let dbReady = false;
+
   try {
-    if (process.env.MONGODB_URI) {
+    if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI) {
       await connectToDatabase();
+      dbReady = true;
     }
   } catch (err) {
     console.warn('[checkin-pipeline] MongoDB connection warning:', err);
@@ -113,7 +116,7 @@ export async function processPatientCheckIn(
 
   // 3. Update Check-In Record with Extracted Payload
   checkInDoc.extractedData = extracted;
-  if (process.env.MONGODB_URI && typeof (checkInDoc as unknown as { save?: () => Promise<unknown> }).save === 'function') {
+  if (dbReady && typeof (checkInDoc as unknown as { save?: () => Promise<unknown> }).save === 'function') {
     try {
       await (checkInDoc as unknown as { save: () => Promise<unknown> }).save();
     } catch (e) {
@@ -127,32 +130,57 @@ export async function processPatientCheckIn(
   extracted.symptoms.forEach((s) => tags.push(`symptom_${s.name}`));
   extracted.concomitantMedications.forEach((m) => tags.push(`med_${m.name.toLowerCase()}`));
 
-  const retainRes = await retainPatientObservation(trialId, patientId, rawResponse, {
-    timestamp,
-    tags,
-    metadata: {
-      checkInId,
-      dayNumber: String(dayNumber),
-      doseTaken: String(extracted.doseTaken),
-    },
-  });
+  let retainRes;
+  try {
+    retainRes = await retainPatientObservation(trialId, patientId, rawResponse, {
+      timestamp,
+      tags,
+      metadata: {
+        checkInId,
+        dayNumber: String(dayNumber),
+        doseTaken: String(extracted.doseTaken),
+      },
+    });
+  } catch (error) {
+    console.warn('[checkin-pipeline] Hindsight retain warning:', error instanceof Error ? error.message : error);
+    retainRes = {
+      ok: false,
+      bankId: buildBankId(trialId, patientId),
+      mode: 'live' as const,
+      message: 'Hindsight retention is pending because the memory service is unavailable.',
+    };
+  }
 
   if (retainRes.operationId && typeof checkInDoc.set === 'function') {
     checkInDoc.hindsightOperationId = retainRes.operationId;
   }
 
   // 5. Hindsight Recall & Reflect (Longitudinal History Search)
-  const recallRes = await recallPatientMemory(
-    trialId,
-    patientId,
-    'What symptoms, adverse events, or dose issues did the patient report in previous check-ins?'
-  );
+  let recallRes;
+  try {
+    recallRes = await recallPatientMemory(
+      trialId,
+      patientId,
+      'What symptoms, adverse events, or dose issues did the patient report in previous check-ins?'
+    );
+  } catch (error) {
+    console.warn('[checkin-pipeline] Hindsight recall warning:', error instanceof Error ? error.message : error);
+    recallRes = { results: [] };
+  }
 
-  const reflectRes = await reflectOnPatientState(
-    trialId,
-    patientId,
-    'Summarize patient longitudinal safety trajectory and dose adherence.'
-  );
+  let reflectRes;
+  try {
+    reflectRes = await reflectOnPatientState(
+      trialId,
+      patientId,
+      'Summarize patient longitudinal safety trajectory and dose adherence.'
+    );
+  } catch (error) {
+    console.warn('[checkin-pipeline] Hindsight reflect warning:', error instanceof Error ? error.message : error);
+    reflectRes = {
+      answer: 'Longitudinal memory synthesis is pending because the memory service is unavailable.',
+    };
+  }
 
   const recalledFacts = recallRes.results.map((r) => r.text);
   const reflectionSummary = reflectRes.answer;
@@ -160,7 +188,7 @@ export async function processPatientCheckIn(
   // 6. Protocol Rules Engine Evaluation
   // Fetch Protocol from DB if available, else use default Protocol rules
   let protocolObj;
-  if (process.env.MONGODB_URI) {
+  if (dbReady) {
     try {
       protocolObj = await ProtocolModel.findOne({ protocolId: trialId }).lean();
     } catch {
@@ -257,7 +285,7 @@ export async function processPatientCheckIn(
   }
 
   // Update patient status if safety violation
-  if (process.env.MONGODB_URI && evaluation.overallStatus === 'SAFETY_VIOLATION') {
+  if (dbReady && evaluation.overallStatus === 'SAFETY_VIOLATION') {
     try {
       await PatientModel.findOneAndUpdate(
         { patientId },
@@ -269,7 +297,7 @@ export async function processPatientCheckIn(
   }
 
   // 8. Log Audit Event
-  if (process.env.MONGODB_URI) {
+  if (dbReady) {
     try {
       await AuditEventModel.create({
         eventId: `AUD-${Date.now()}`,

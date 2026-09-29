@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import mongoose from 'mongoose';
 import { PatientModel, CheckInModel, ComplianceLogModel, ProtocolModel } from '@/models';
 import { connectToDatabase } from '@/lib/mongodb';
 import { recallPatientMemory, reflectOnPatientState } from './hindsight-memory';
@@ -229,17 +230,27 @@ const fallbackAlertHistory = {
 };
 
 async function maybeConnectDb(): Promise<void> {
-  if (process.env.MONGODB_URI) {
+  if (process.env.MONGODB_MODE === 'mock' || !process.env.MONGODB_URI) {
+    return;
+  }
+
+  try {
     await connectToDatabase();
+  } catch (error) {
+    console.warn('[coordinator-agent] MongoDB unavailable, using fallback data:', error instanceof Error ? error.message : error);
   }
 }
 
 export async function getPatient(trialId: string, patientId: string): Promise<Record<string, unknown> | null> {
   await maybeConnectDb();
 
-  if (process.env.MONGODB_URI) {
-    const patient = await PatientModel.findOne({ trialId, patientId }).lean();
-    if (patient) return patient as unknown as Record<string, unknown>;
+  if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    try {
+      const patient = await PatientModel.findOne({ trialId, patientId }).lean();
+      if (patient) return patient as unknown as Record<string, unknown>;
+    } catch (error) {
+      console.warn('[coordinator-agent] Patient lookup failed, using fallback data:', error instanceof Error ? error.message : error);
+    }
   }
 
   return (fallbackPatients[patientId as keyof typeof fallbackPatients] ?? null) as Record<string, unknown> | null;
@@ -248,10 +259,14 @@ export async function getPatient(trialId: string, patientId: string): Promise<Re
 export async function searchPatients(trialId: string, query?: string): Promise<Record<string, unknown>[]> {
   await maybeConnectDb();
 
-  if (process.env.MONGODB_URI) {
-    const pattern = query ? new RegExp(query, 'i') : /.*/;
-    const patients = await PatientModel.find({ trialId, patientId: pattern }).lean();
-    return patients as unknown as Record<string, unknown>[];
+  if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    try {
+      const pattern = query ? new RegExp(query, 'i') : /.*/;
+      const patients = await PatientModel.find({ trialId, patientId: pattern }).lean();
+      return patients as unknown as Record<string, unknown>[];
+    } catch (error) {
+      console.warn('[coordinator-agent] Patient search failed, using fallback data:', error instanceof Error ? error.message : error);
+    }
   }
 
   const entries = Object.values(fallbackPatients).filter((patient) => {
@@ -270,12 +285,16 @@ export async function getPatientTimeline(
 ): Promise<Record<string, unknown>[]> {
   await maybeConnectDb();
 
-  if (process.env.MONGODB_URI) {
-    const timeline = await CheckInModel.find({ trialId, patientId })
-      .sort({ timestamp: -1 })
-      .limit(limit)
-      .lean();
-    return timeline as unknown as Record<string, unknown>[];
+  if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    try {
+      const timeline = await CheckInModel.find({ trialId, patientId })
+        .sort({ timestamp: -1 })
+        .limit(limit)
+        .lean();
+      return timeline as unknown as Record<string, unknown>[];
+    } catch (error) {
+      console.warn('[coordinator-agent] Timeline lookup failed, using fallback data:', error instanceof Error ? error.message : error);
+    }
   }
 
   return ((fallbackCheckIns[patientId as keyof typeof fallbackCheckIns] ?? []).slice(0, limit)) as unknown as Record<string, unknown>[];
@@ -310,9 +329,13 @@ export async function reflectPatientMemory(
 export async function getProtocolRules(trialId: string): Promise<TrialProtocolData> {
   await maybeConnectDb();
 
-  if (process.env.MONGODB_URI) {
-    const record = await ProtocolModel.findOne({ protocolId: trialId }).lean();
-    if (record) return record as TrialProtocolData;
+  if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    try {
+      const record = await ProtocolModel.findOne({ protocolId: trialId }).lean();
+      if (record) return record as TrialProtocolData;
+    } catch (error) {
+      console.warn('[coordinator-agent] Protocol lookup failed, using fallback data:', error instanceof Error ? error.message : error);
+    }
   }
 
   return fallbackProtocol;
@@ -377,11 +400,15 @@ export async function getAlertHistory(
 ): Promise<Array<Record<string, unknown>>> {
   await maybeConnectDb();
 
-  if (process.env.MONGODB_URI) {
-    const query: Record<string, unknown> = { trialId };
-    if (patientId) query.patientId = patientId;
-    const logs = await ComplianceLogModel.find(query).sort({ evaluatedAt: -1 }).limit(limit).lean();
-    return logs as unknown as Record<string, unknown>[];
+  if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    try {
+      const query: Record<string, unknown> = { trialId };
+      if (patientId) query.patientId = patientId;
+      const logs = await ComplianceLogModel.find(query).sort({ evaluatedAt: -1 }).limit(limit).lean();
+      return logs as unknown as Record<string, unknown>[];
+    } catch (error) {
+      console.warn('[coordinator-agent] Alert history lookup failed, using fallback data:', error instanceof Error ? error.message : error);
+    }
   }
 
   const patientLogs = patientId ? fallbackAlertHistory[patientId as keyof typeof fallbackAlertHistory] ?? [] : Object.values(fallbackAlertHistory).flat();
@@ -395,11 +422,15 @@ export async function getCoordinatorReviews(
 ): Promise<Array<Record<string, unknown>>> {
   await maybeConnectDb();
 
-  if (process.env.MONGODB_URI) {
-    const query: Record<string, unknown> = { trialId, 'coordinatorActionTaken.action': { $exists: true } };
-    if (patientId) query.patientId = patientId;
-    const logs = await ComplianceLogModel.find(query).sort({ evaluatedAt: -1 }).limit(limit).lean();
-    return logs as unknown as Record<string, unknown>[];
+  if (process.env.MONGODB_MODE !== 'mock' && process.env.MONGODB_URI && mongoose.connection.readyState === 1) {
+    try {
+      const query: Record<string, unknown> = { trialId, 'coordinatorActionTaken.action': { $exists: true } };
+      if (patientId) query.patientId = patientId;
+      const logs = await ComplianceLogModel.find(query).sort({ evaluatedAt: -1 }).limit(limit).lean();
+      return logs as unknown as Record<string, unknown>[];
+    } catch (error) {
+      console.warn('[coordinator-agent] Coordinator review lookup failed, using fallback data:', error instanceof Error ? error.message : error);
+    }
   }
 
   const patientLogs = patientId ? fallbackAlertHistory[patientId as keyof typeof fallbackAlertHistory] ?? [] : Object.values(fallbackAlertHistory).flat();
