@@ -81,6 +81,8 @@ This patient shows the full trial story:
 
 Use the patient narrative in the live demo to explain why the system matters.
 
+The dashboard reads the synthetic cohort through `/api/benchmark`, computes KPI values from that response, and exposes P1047 memory signals in the primary operations view. Dedicated coordinator mutations still require the protected API routes and are not represented as pretend dashboard success states.
+
 ## Submission package
 
 For the final handoff, use:

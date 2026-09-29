@@ -627,3 +627,27 @@ The project has a stable hero patient and submission narrative, but the final au
 ### Remaining status
 
 Live integrations, public deployment, complete authorization scope, API-backed dashboard behavior, dedicated operational entities, and production-grade PDF ingestion remain open according to the audit.
+
+---
+
+## PHASE 17 — Product Completion and UI Overhaul
+
+**Date:** 2026-09-30  
+**Status:** PARTIAL - UI IMPROVED, BACKEND GAPS OPEN
+
+### What was implemented
+
+- Replaced the hardcoded overview dashboard with an API-backed view using `/api/benchmark`.
+- Added computed cohort KPIs, selectable patient roster, P1047 focus view, review queue, memory signals, protocol guardrails, and responsive loading/error/empty states.
+- Added [`docs/ui-audit.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/ui-audit.md) with browser smoke results and remaining UX gaps.
+
+### Verification
+
+- Desktop browser smoke: **Passed**; benchmark data and P1047 rendered.
+- Mobile browser smoke at 390px: **Passed**; no horizontal overflow.
+- `npm test -- --runInBand`: **Passed (66/66 tests)**
+- `npm run build`: **Passed**
+
+### Remaining status
+
+Dedicated patient, alert, protocol, and assistant UI workflows, live integrations, and full end-to-end verification remain incomplete. See [`docs/final-audit.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/final-audit.md).

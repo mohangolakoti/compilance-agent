@@ -10,6 +10,8 @@
 
 The critical local regression suite and production build are now green, but several PRD-critical workflows remain partial or represented by fallback/demo data. External MongoDB, Hindsight, Groq, and Vercel behavior could not be authenticated from this environment.
 
+The dashboard was subsequently overhauled to consume `/api/benchmark`, compute displayed KPIs from returned data, expose patient-scoped Hindsight signals, and provide responsive loading, error, and empty states. Details are in [`docs/ui-audit.md`](file:///d:/Temp/mc-hack/compilance-agent/docs/ui-audit.md).
+
 ## Baseline evidence
 
 - `npm run build`: PASS.
@@ -34,7 +36,7 @@ The critical local regression suite and production build are now green, but seve
 
 ### P1
 
-1. The main dashboard contains hardcoded operational counts, alerts, insights, and protocol data instead of API-backed state.
+1. Dedicated patient, alert, protocol, and assistant workflows remain incomplete beyond the API-backed overview dashboard.
 2. There is no dedicated Trial, Alert, or CoordinatorReview model; ComplianceLog is overloaded for alerts/reviews.
 3. Compliance evaluation is primarily current-event based; longitudinal thresholds/date windows are incomplete.
 4. Protocol PDF ingestion is byte decoding/regex extraction rather than reliable PDF parsing with page/source references.
@@ -62,7 +64,7 @@ The critical local regression suite and production build are now green, but seve
 | Check-in workflow | PARTIAL | Pipeline exists; configured live services cause timeouts and durable failure states are incomplete. |
 | Alerts and review | PARTIAL | Compliance logs/review routes exist; dedicated alert/review persistence and auth are missing. |
 | Coordinator assistant | PARTIAL | Bounded service exists; actual tool-calling behavior is not verified. |
-| UI workflows | FAIL/PARTIAL | Memory demo renders; primary dashboard is largely hardcoded and interactions are incomplete. |
+| UI workflows | PARTIAL | Dashboard now consumes benchmark API data and is responsive; dedicated patient/alert/protocol/assistant workflows remain incomplete. |
 | Protocol ingestion | FAIL/PARTIAL | Candidate extraction exists; genuine PDF parsing/upload/page provenance is incomplete. |
 | Synthetic benchmark | PARTIAL | Dataset and questions exist; benchmark accuracy has not been measured. |
 | Security | FAIL | No authentication, authorization, rate limiting, or complete patient-scope enforcement. |

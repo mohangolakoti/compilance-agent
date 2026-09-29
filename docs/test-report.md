@@ -14,6 +14,7 @@
 | Hindsight live authentication | NOT TESTABLE | No authenticated live request was established. |
 | Groq live authentication | NOT TESTABLE | No authenticated live request was established. |
 | Public deployment smoke test | NOT TESTABLE | No public deployment URL was available. |
+| Browser dashboard smoke | PASS | Dashboard loaded from `/api/benchmark`; P1047 rendered; 390px viewport had no horizontal overflow. |
 
 ## Coverage by critical path
 
